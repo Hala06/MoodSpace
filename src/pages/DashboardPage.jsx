@@ -8,6 +8,8 @@ import { loadCheckins } from '../utils/checkinStorage';
 import { getMoodById, moodScoreMap } from '../data/moodData';
 import { useAuth } from '../contexts/AuthContext';
 import FloatingOrb from '../components/FloatingOrb';
+import AnimatedBlobs from '../components/AnimatedBlobs';
+import SparklesComponent from '../components/Sparkles';
 import './dashboard.css';
 
 const DashboardPage = () => {
@@ -110,6 +112,10 @@ const DashboardPage = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Ambient Effects */}
+      <AnimatedBlobs />
+      <SparklesComponent density={30} />
+      
       <FloatingOrb opacity={0.2} />
       
       {/* Welcome Header */}
@@ -308,7 +314,7 @@ const StatCard = ({ icon, label, value, color, delay }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
-    whileHover={{ y: -5 }}
+    whileHover={{ y: -5, scale: 1.02 }}
   >
     <div className="stat-icon" style={{ background: `${color}15`, color }}>
       {React.createElement(icon, { size: 24 })}
@@ -326,6 +332,7 @@ const ChartCard = ({ title, children, delay }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay }}
+    whileHover={{ y: -3 }}
   >
     <h2 className="chart-title">{title}</h2>
     {children}

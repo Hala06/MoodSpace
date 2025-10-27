@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { loadJournalEntries, saveJournalEntry, deleteJournalEntry, generateAIPrompts } from '../utils/journalStorage';
 import { formatDate } from '../utils/dateHelpers';
+import AnimatedBlobs from '../components/AnimatedBlobs';
+import SparklesComponent from '../components/Sparkles';
 import './journal.css';
 
 const MOOD_OPTIONS = [
@@ -80,6 +82,10 @@ const JournalPage = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
+      {/* Ambient Effects */}
+      <AnimatedBlobs />
+      <SparklesComponent density={30} />
+      
       <div className="journal-header">
         <div>
           <h1>My Journal</h1>
@@ -138,26 +144,26 @@ const JournalCard = ({ entry, index, onClick }) => (
     className="journal-card"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1 }}
-    whileHover={{ y: -5 }}
+    transition={{ delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+    whileHover={{ y: -5, scale: 1.02 }}
     onClick={onClick}
   >
     <div className="card-header">
-      <span className="card-mood">{entry.mood}</span>
+      <span className="card-mood">{String(entry.mood || '😊')}</span>
       <span className="card-date">
         <Calendar size={14} />
         {formatDate(entry.timestamp)}
       </span>
     </div>
     <p className="card-content">
-      {entry.content.length > 150 
+      {typeof entry.content === 'string' && entry.content.length > 150 
         ? `${entry.content.substring(0, 150)}...` 
-        : entry.content}
+        : String(entry.content || '')}
     </p>
-    {entry.tags && entry.tags.length > 0 && (
+    {entry.tags && Array.isArray(entry.tags) && entry.tags.length > 0 && (
       <div className="card-tags">
-        {entry.tags.slice(0, 3).map(tag => (
-          <span key={tag} className="tag">{tag}</span>
+        {entry.tags.slice(0, 3).map((tag, idx) => (
+          <span key={idx} className="tag">{String(tag)}</span>
         ))}
         {entry.tags.length > 3 && (
           <span className="tag-more">+{entry.tags.length - 3} more</span>

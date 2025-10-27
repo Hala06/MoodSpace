@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../utils/useTheme';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { Home, LayoutDashboard, BookOpen, MessageSquare, Plus, Sun, Moon, LogIn, LogOut, UserCircle } from 'lucide-react';
+import { Home, LayoutDashboard, BookOpen, MessageSquare, Plus, LogIn, LogOut, UserCircle } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 const navItems = [
@@ -17,7 +16,6 @@ export default function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const [theme, toggleTheme] = useTheme();
   const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
@@ -121,26 +119,6 @@ export default function AppLayout() {
                 <LogIn size={18} />
               </Motion.button>
             )}
-            
-            <Motion.button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              aria-label="Toggle theme"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                <Motion.span
-                  key={theme}
-                  initial={{ opacity: 0, y: -20, scale: 0.5 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.5 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                </Motion.span>
-              </AnimatePresence>
-            </Motion.button>
 
           </div>
         </div>

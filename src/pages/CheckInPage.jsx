@@ -9,6 +9,8 @@ import { moodOptions, getMoodById, energyLabels, moodColorMap } from '../data/mo
 import { loadCheckins, persistCheckins } from '../utils/checkinStorage';
 import { buildPromptSet, suggestMicroActions } from '../utils/promptEngine';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import AnimatedBlobs from '../components/AnimatedBlobs';
+import SparklesComponent from '../components/Sparkles';
 import './check-in.css';
 
 const focusAreas = ['Rest', 'Connection', 'Movement', 'Creativity', 'Nature', 'Support'];
@@ -134,6 +136,10 @@ const CheckInPage = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Ambient Effects */}
+      <AnimatedBlobs />
+      <SparklesComponent density={30} />
+      
       <div className="check-in-container">
         <AnimatePresence mode="wait">
           {!selectedMood ? (
@@ -169,6 +175,7 @@ const MoodSelection = ({ onSelect }) => (
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -30 }}
+    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
   >
     <div className="mood-header">
       <h1>How are you landing today?</h1>
@@ -183,8 +190,8 @@ const MoodSelection = ({ onSelect }) => (
           onClick={() => onSelect(mood.id)}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: index * 0.05 }}
-          whileHover={{ y: -6 }}
+          transition={{ duration: 0.4, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={{ y: -6, scale: 1.02 }}
           whileTap={{ scale: 0.96 }}
         >
           <span className="mood-emoji">{mood.emoji}</span>

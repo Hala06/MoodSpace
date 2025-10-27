@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { loadForumPosts, createForumPost, likeForumPost, replyToForumPost, reportForumPost, getUserLikedPosts } from '../utils/forumStorage';
 import { formatTimeAgo } from '../utils/dateHelpers';
 import toast from 'react-hot-toast';
+import AnimatedBlobs from '../components/AnimatedBlobs';
+import SparklesComponent from '../components/Sparkles';
 import './forum.css';
 
 const ForumCard = ({ post, onLike, onReply, onReport, isLiked }) => {
@@ -28,7 +30,8 @@ const ForumCard = ({ post, onLike, onReply, onReport, isLiked }) => {
       className="forum-card"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -3, scale: 1.01 }}
     >
       <div className="post-header">
         <div className="post-author">
@@ -44,12 +47,12 @@ const ForumCard = ({ post, onLike, onReply, onReport, isLiked }) => {
       </div>
 
       <div className="post-content">
-        <p>{post.content}</p>
+        <p>{String(post.content || '')}</p>
       </div>
 
       {post.tag && (
         <div className="post-tag">
-          <span className="tag-badge">{post.tag}</span>
+          <span className="tag-badge">{String(post.tag)}</span>
         </div>
       )}
 
@@ -116,13 +119,13 @@ const ForumCard = ({ post, onLike, onReply, onReport, isLiked }) => {
           {post.replies.map((reply, index) => (
             <div key={index} className="reply-item">
               <div className="reply-header">
-                <div className="reply-avatar">{reply.mood}</div>
+                <div className="reply-avatar">{String(reply.mood || '😊')}</div>
                 <div className="reply-info">
                   <span className="reply-author">Anonymous User</span>
                   <span className="reply-time">{formatTimeAgo(new Date(reply.createdAt))}</span>
                 </div>
               </div>
-              <p className="reply-content">{reply.content}</p>
+              <p className="reply-content">{String(reply.content || '')}</p>
             </div>
           ))}
         </Motion.div>
@@ -304,6 +307,10 @@ const ForumPage = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
+      {/* Ambient Effects */}
+      <AnimatedBlobs />
+      <SparklesComponent density={30} />
+      
       <div className="forum-header">
         <div className="header-content">
           <h1>
