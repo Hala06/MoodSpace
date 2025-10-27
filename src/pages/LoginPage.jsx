@@ -10,7 +10,6 @@ import AnimatedBlobs from '../components/AnimatedBlobs';
 import SparklesComponent from '../components/Sparkles';
 import { registerUser, loginUser } from '../utils/api.js';
 import './login.css';
-import { registerUser, loginUser } from '../utils/api.js';
 
 const LoginPage = () => {
   const navigate = useNavigate();
