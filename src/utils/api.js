@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:8080/my-checkin"
+const BASE_URL = "https://my-checkin-app.up.railway.app/my-checkin"
 
 export const registerUser = async ({ username, password, email }) => {
     const response = await axios.post(`${BASE_URL}/register`, { username, password, email });
