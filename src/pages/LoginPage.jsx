@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import DiamondModel from '../components/DiamondModel';
 import AnimatedBlobs from '../components/AnimatedBlobs';
 import SparklesComponent from '../components/Sparkles';
+import { registerUser, loginUser } from '../utils/api.js';
 import './login.css';
 
 const LoginPage = () => {
@@ -44,14 +45,14 @@ const LoginPage = () => {
     setIsLogin((prev) => !prev);
   };
 
-  const handleAuth = async ({ email, name, password }) => {
+  const handleAuth = async ({ email, username, password }) => {
     setError('');
     if (!email) {
       setError('Please enter your email.');
       return;
     }
     
-    if (!isLogin && !name) {
+    if (!isLogin && !username) {
       setError('Please enter your name.');
       return;
     }
@@ -63,12 +64,31 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      login({ email, name: name || email.split('@')[0] });
-      toast.success(isLogin ? '🎉 Welcome back!' : '✨ Account created!');
-      navigate(redirectPath);
-    } catch {
-      setError('Something went wrong. Please try again.');
+      if (isLogin) {
+        // LOGIN - call backend
+        const token = await loginUser({ email, password });
+        localStorage.setItem('token', token);
+        login({ email, username: email.split('@')[0], token });
+        toast.success('🎉 Welcome back!');
+        navigate(redirectPath);
+      } else {
+        // REGISTER - call backend
+        await registerUser({ username, email, password });
+        toast.success('✨ Account created! Please sign in.');
+        setIsLogin(true); // Switch to login form
+      }
+    } catch (err) {
+      // Handle different error types
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else if (err.response?.status === 409) {
+        setError("Email already registered");
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+      console.error('Auth error:', err);
     } finally {
       setLoading(false);
     }
@@ -232,7 +252,7 @@ const LoginForm = ({ toggleForm, onSubmit, loading }) => {
 };
 
 const SignupForm = ({ toggleForm, onSubmit, loading }) => {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -255,7 +275,7 @@ const SignupForm = ({ toggleForm, onSubmit, loading }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit({ name, email, password });
+    onSubmit({ username, email, password });
   };
 
   const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
@@ -276,15 +296,15 @@ const SignupForm = ({ toggleForm, onSubmit, loading }) => {
       
       <form onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="signup-name">Full name</label>
+          <label htmlFor="signup-name">Username</label>
           <div className="input-wrapper">
             <User size={18} className="input-icon" />
             <input
               type="text"
               id="signup-name"
-              placeholder="Your name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
+              placeholder="Username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
               required
               autoFocus
             />
