@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { Toaster } from 'react-hot-toast';
 import FloatingOrb from '../components/FloatingOrb';
 import './login.css';
+import { registerUser, loginUser } from '../utils/api.js';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const LoginPage = () => {
   const handleGuestLogin = () => {
     try {
       const guestNumber = Math.floor(Math.random() * 9000) + 1000;
-      login({ email: `guest${guestNumber}@moodspace.app`, name: `Guest ${guestNumber}` });
+      login({ email: `guest${guestNumber}@moodspace.app`, username: `Guest ${guestNumber}` });
       toast.success('Welcome! Exploring as a guest ✨');
       navigate(redirectPath);
     } catch {
@@ -42,14 +43,14 @@ const LoginPage = () => {
     setIsLogin((prev) => !prev);
   };
 
-  const handleAuth = async ({ email, name, password }) => {
+  const handleAuth = async ({ email, username, password }) => {
     setError('');
     if (!email) {
       setError('Please enter your email.');
       return;
     }
     
-    if (!isLogin && !name) {
+    if (!isLogin && !username) {
       setError('Please enter your name.');
       return;
     }
@@ -61,12 +62,23 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      login({ email, name: name || email.split('@')[0] });
-      toast.success(isLogin ? '🎉 Welcome back!' : '✨ Account created!');
-      navigate(redirectPath);
+      if(isLogin) {
+        const token = await loginUser({ email, password });
+        localStorage.setItem('token', token);
+        login({ email, username, token });
+        toast.success('🎉 Welcome back!');
+        navigate(redirectPath);
+      } else {
+        await registerUser({ username, email, password});
+        toast.success('✨ Account created!');
+        setIsLogin(true);
+      }
     } catch {
-      setError('Something went wrong. Please try again.');
+      if (error.response?.status === 401) {
+        setError("Invalid Credentials");
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -226,7 +238,7 @@ const LoginForm = ({ toggleForm, onSubmit, loading }) => {
 };
 
 const SignupForm = ({ toggleForm, onSubmit, loading }) => {
-  const [name, setName] = useState('');
+  const [username, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -249,7 +261,7 @@ const SignupForm = ({ toggleForm, onSubmit, loading }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit({ name, email, password });
+    onSubmit({ username, email, password });
   };
 
   const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
@@ -270,14 +282,14 @@ const SignupForm = ({ toggleForm, onSubmit, loading }) => {
       
       <form onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="signup-name">Full name</label>
+          <label htmlFor="signup-name">Username</label>
           <div className="input-wrapper">
             <User size={18} className="input-icon" />
             <input
               type="text"
               id="signup-name"
-              placeholder="Your name"
-              value={name}
+              placeholder="Username"
+              value={username}
               onChange={(event) => setName(event.target.value)}
               required
               autoFocus
