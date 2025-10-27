@@ -5,7 +5,9 @@ import { LogIn, UserPlus, ArrowRight, Sparkles, Mail, Lock, User } from 'lucide-
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { Toaster } from 'react-hot-toast';
-import FloatingOrb from '../components/FloatingOrb';
+import DiamondModel from '../components/DiamondModel';
+import AnimatedBlobs from '../components/AnimatedBlobs';
+import SparklesComponent from '../components/Sparkles';
 import './login.css';
 
 const LoginPage = () => {
@@ -74,6 +76,10 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
+      {/* Ambient Effects */}
+      <AnimatedBlobs />
+      <SparklesComponent density={35} />
+      
       <Toaster
         position="top-center"
         toastOptions={{
@@ -92,7 +98,7 @@ const LoginPage = () => {
         }}
       />
       
-      <FloatingOrb opacity={0.3} />
+      <DiamondModel />
       
       <div className="login-container">
         <Motion.div 

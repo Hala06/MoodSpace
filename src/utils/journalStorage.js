@@ -47,7 +47,19 @@ export const loadJournalEntries = (userId = 'default') => {
     const stored = localStorage.getItem(key);
     
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Validate and clean the data
+      const cleaned = parsed.map(entry => ({
+        id: entry.id || `entry-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        content: String(entry.content || ''),
+        mood: String(entry.mood || '😊'),
+        tags: Array.isArray(entry.tags) ? entry.tags.map(t => String(t)) : [],
+        timestamp: entry.timestamp || new Date().toISOString(),
+        aiPrompt: String(entry.aiPrompt || '')
+      }));
+      // Save cleaned data back
+      localStorage.setItem(key, JSON.stringify(cleaned));
+      return cleaned;
     }
     
     // Return sample entries for first-time users
@@ -56,6 +68,12 @@ export const loadJournalEntries = (userId = 'default') => {
     return samples;
   } catch (error) {
     console.error('Error loading journal entries:', error);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(JOURNAL_KEY_PREFIX + userId);
+    } catch {
+      // Ignore
+    }
     return [];
   }
 };

@@ -101,7 +101,24 @@ export const loadForumPosts = () => {
     const stored = localStorage.getItem(FORUM_POSTS_KEY);
     
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Validate and clean the data
+      const cleaned = parsed.map(post => ({
+        ...post,
+        content: typeof post.content === 'string' ? post.content : String(post.content || ''),
+        mood: typeof post.mood === 'string' ? post.mood : '😊',
+        tag: typeof post.tag === 'string' ? post.tag : '',
+        likes: Number(post.likes) || 0,
+        likedBy: Array.isArray(post.likedBy) ? post.likedBy : [],
+        replies: Array.isArray(post.replies) ? post.replies.map(reply => ({
+          ...reply,
+          content: typeof reply.content === 'string' ? reply.content : String(reply.content || ''),
+          mood: typeof reply.mood === 'string' ? reply.mood : '😊',
+          createdAt: reply.createdAt || reply.timestamp || new Date().toISOString()
+        })) : [],
+        createdAt: post.createdAt || post.timestamp || new Date().toISOString()
+      }));
+      return cleaned;
     }
     
     // Return sample posts for first-time users
@@ -110,6 +127,12 @@ export const loadForumPosts = () => {
     return samples;
   } catch (error) {
     console.error('Error loading forum posts:', error);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(FORUM_POSTS_KEY);
+    } catch {
+      // Ignore
+    }
     return [];
   }
 };
