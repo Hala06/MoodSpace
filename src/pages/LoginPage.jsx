@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import DiamondModel from '../components/DiamondModel';
 import AnimatedBlobs from '../components/AnimatedBlobs';
 import SparklesComponent from '../components/Sparkles';
+import { registerUser, loginUser } from '../utils/api.js';
 import './login.css';
 import { registerUser, loginUser } from '../utils/api.js';
 
@@ -64,23 +65,31 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      if(isLogin) {
+      if (isLogin) {
+        // LOGIN - call backend
         const token = await loginUser({ email, password });
         localStorage.setItem('token', token);
-        login({ email, username, token });
+        login({ email, username: email.split('@')[0], token });
         toast.success('🎉 Welcome back!');
         navigate(redirectPath);
       } else {
-        await registerUser({ username, email, password});
-        toast.success('✨ Account created!');
-        setIsLogin(true);
+        // REGISTER - call backend
+        await registerUser({ username, email, password });
+        toast.success('✨ Account created! Please sign in.');
+        setIsLogin(true); // Switch to login form
       }
-    } catch {
-      if (error.response?.status === 401) {
-        setError("Invalid Credentials");
+    } catch (err) {
+      // Handle different error types
+      if (err.response?.status === 401) {
+        setError("Invalid email or password");
+      } else if (err.response?.status === 409) {
+        setError("Email already registered");
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
       } else {
         setError('Something went wrong. Please try again.');
       }
+      console.error('Auth error:', err);
     } finally {
       setLoading(false);
     }
@@ -244,7 +253,7 @@ const LoginForm = ({ toggleForm, onSubmit, loading }) => {
 };
 
 const SignupForm = ({ toggleForm, onSubmit, loading }) => {
-  const [username, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -296,7 +305,7 @@ const SignupForm = ({ toggleForm, onSubmit, loading }) => {
               id="signup-name"
               placeholder="Username"
               value={username}
-              onChange={(event) => setName(event.target.value)}
+              onChange={(event) => setUsername(event.target.value)}
               required
               autoFocus
             />
